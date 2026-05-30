@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minería de Datos · AdventureWorks2022</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --card: #161a22;
+    --border: #1e2430;
+    --accent: #e8c547;
+    --accent2: #4ecdc4;
+    --accent3: #ff6b6b;
+    --text: #e8e6df;
+    --muted: #7a8294;
+    --code-bg: #0d1117;
+    --code-border: #21262d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lora', Georgia, serif;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(232,197,71,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,197,71,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridScroll 20s linear infinite;
+  }
+
+  @keyframes gridScroll {
+    0%   { background-position: 0 0; }
+    100% { background-position: 60px 60px; }
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,197,71,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+    50%      { transform: translate(-50%,-50%) scale(1.15); opacity: 0.7; }
+  }
+
+  .hero-content {
+    position: relative; z-index: 2;
+    text-align: center;
+    padding: 2rem;
+    max-width: 900px;
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.3s;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 12vw, 10rem);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.5s;
+  }
+
+  .hero-title span { color: var(--accent); }
+
+  .hero-subtitle {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    color: var(--muted);
+    margin-top: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.7s;
+  }
+
+  .hero-meta {
+    display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;
+    margin-top: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.9s;
+  }
+
+  .hero-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .hero-badge.accent { border-color: var(--accent); color: var(--accent); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .scroll-hint {
+    position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.2em;
+    color: var(--muted); text-transform: uppercase;
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    animation: float 2s ease-in-out infinite;
+  }
+
+  .scroll-hint::after {
+    content: '';
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+  }
+
+  @keyframes float {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* ── INTRO SECTION ── */
+  .intro-section {
+    padding: 6rem 0 4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .intro-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+  }
+
+  .intro-title em { color: var(--accent); font-style: italic; }
+
+  .intro-text { color: var(--muted); font-size: 1rem; line-height: 1.9; }
+  .intro-text + .intro-text { margin-top: 1rem; }
+
+  .stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .stat-card:hover::before { transform: scaleX(1); }
+
+  .stat-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.4rem;
+  }
+
+  /* ── EJEMPLOS ── */
+  .examples-section { padding: 5rem 0; }
+
+  .examples-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .examples-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 7vw, 5rem);
+    color: var(--text);
+    letter-spacing: 0.05em;
+  }
+
+  .examples-title span { color: var(--accent); }
+
+  /* ── EJEMPLO CARD ── */
+  .example-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+  }
+
+  .example-card:hover { border-color: var(--accent); }
+
+  .card-stripe {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  }
+
+  .stripe-1 { background: var(--accent); }
+  .stripe-2 { background: var(--accent2); }
+  .stripe-3 { background: var(--accent3); }
+  .stripe-4 { background: #a78bfa; }
+  .stripe-5 { background: #fb923c; }
+  .stripe-6 { background: #34d399; }
+  .stripe-7 { background: #f472b6; }
+  .stripe-8 { background: #60a5fa; }
+  .stripe-9 { background: #fbbf24; }
+  .stripe-10 { background: #c084fc; }
+
+  .card-header {
+    padding: 2rem 2rem 1.5rem 2.5rem;
+    display: flex; align-items: flex-start; gap: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--border);
+    flex-shrink: 0;
+    min-width: 3rem;
+  }
+
+  .card-meta { flex: 1; }
+
+  .card-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .tag-yellow  { color: var(--accent); }
+  .tag-teal    { color: var(--accent2); }
+  .tag-red     { color: var(--accent3); }
+  .tag-purple  { color: #a78bfa; }
+  .tag-orange  { color: #fb923c; }
+  .tag-green   { color: #34d399; }
+  .tag-pink    { color: #f472b6; }
+  .tag-blue    { color: #60a5fa; }
+  .tag-amber   { color: #fbbf24; }
+  .tag-violet  { color: #c084fc; }
+
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .card-body { padding: 1.5rem 2rem 1.5rem 2.5rem; }
+
+  .objective-box {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .objective-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+
+  .objective-text {
+    font-size: 0.95rem;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .explanation {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+
+  .explanation strong { color: var(--text); font-weight: 600; }
+
+  /* ── CODE BLOCK ── */
+  .code-wrapper { position: relative; }
+
+  .code-label {
+    background: var(--code-border);
+    padding: 0.4rem 1rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .copy-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none; border: 1px solid var(--border);
+    padding: 0.2rem 0.6rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: #34d399; border-color: #34d399; }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-top: none;
+    padding: 1.5rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: #c9d1d9;
+    max-height: 420px;
+  }
+
+  /* SQL syntax highlight */
+  .kw  { color: #ff7b72; }   /* keywords */
+  .fn  { color: #d2a8ff; }   /* functions */
+  .cm  { color: #8b949e; font-style: italic; } /* comments */
+  .str { color: #a5d6ff; }   /* strings */
+  .num { color: #79c0ff; }   /* numbers */
+  .op  { color: #e8c547; }   /* operators / punctuation accent */
+  .tb  { color: #ffa657; }   /* table names */
+  .al  { color: #56d364; }   /* aliases */
+
+  /* ── NAV ── */
+  .nav-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,12,16,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex; gap: 1.5rem;
+    list-style: none;
+    overflow-x: auto;
+  }
+
+  .nav-links a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .footer-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .footer-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.5rem;
+  }
+
+  /* ── RESULTS INFO ── */
+  .result-tags {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .rtag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width: 768px) {
+    .intro-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav-bar">
+  <a href="#" class="nav-logo">DataMine</a>
+  <ul class="nav-links">
+    <li><a href="#intro">Introducción</a></li>
+    <li><a href="#ejemplos">Ejemplos</a></li>
+    <li><a href="#ej1">01 · Ventas</a></li>
+    <li><a href="#ej2">02 · Clientes</a></li>
+    <li><a href="#ej3">03 · Productos</a></li>
+    <li><a href="#ej4">04 · RFM</a></li>
+    <li><a href="#ej5">05 · Tendencias</a></li>
+    <li><a href="#ej6">06 · Rentabilidad</a></li>
+    <li><a href="#ej7">07 · Empleados</a></li>
+    <li><a href="#ej8">08 · Geografía</a></li>
+    <li><a href="#ej9">09 · Anomalías</a></li>
+    <li><a href="#ej10">10 · Predicción</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <p class="hero-label">// Blog técnico · SQL Server 2022</p>
+    <h1 class="hero-title">Minería<br>de <span>Datos</span></h1>
+    <p class="hero-subtitle">10 ejemplos prácticos sobre AdventureWorks2022</p>
+    <div class="hero-meta">
+      <span class="hero-badge accent">SQL Server T-SQL</span>
+      <span class="hero-badge">AdventureWorks2022</span>
+      <span class="hero-badge">10 Scripts</span>
+      <span class="hero-badge">Data Mining</span>
+    </div>
+  </div>
+  <div class="scroll-hint">scroll</div>
+</section>
+
+<!-- INTRO -->
+<section class="intro-section" id="intro">
+  <div class="container">
+    <p class="section-tag">// 00 · Introducción</p>
+    <div class="intro-grid">
+      <div>
+        <h2 class="intro-title">¿Qué es la<br><em>Minería de Datos?</em></h2>
+        <p class="intro-text">
+          La <strong>Minería de Datos</strong> (Data Mining) es el proceso de descubrir patrones, correlaciones, anomalías y tendencias significativas en grandes conjuntos de datos, combinando métodos estadísticos, aprendizaje automático y bases de datos.
+        </p>
+        <p class="intro-text" style="margin-top:1rem;">
+          A través de consultas analíticas avanzadas sobre <strong>AdventureWorks2022</strong>, exploraremos cómo extraer inteligencia de negocio real: segmentación de clientes, análisis de rentabilidad, detección de anomalías y modelos predictivos.
+        </p>
+        <p class="intro-text" style="margin-top:1rem;">
+          Cada ejemplo incluye el script T-SQL completo, una explicación del objetivo y las tablas involucradas de la base de datos de ejemplo de Microsoft SQL Server.
+        </p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">10</div>
+          <div class="stat-label">Técnicas de minería</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">70+</div>
+          <div class="stat-label">Tablas disponibles</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">2022</div>
+          <div class="stat-label">SQL Server versión</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">T-SQL</div>
+          <div class="stat-label">Lenguaje utilizado</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EJEMPLOS -->
+<section class="examples-section" id="ejemplos">
+  <div class="container">
+
+    <div class="examples-header">
+      <p class="section-tag">// Scripts & análisis</p>
+      <h2 class="examples-title">Los <span>10</span> Ejemplos</h2>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- EJEMPLO 1 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="example-card" id="ej1">
+      <div class="card-stripe stripe-1"></div>
+      <div class="card-header">
+        <div class="card-number">01</div>
+        <div class="card-meta">
+          <div class="card-tag tag-yellow">Análisis de Ventas · Agregación</div>
+          <h3 class="card-title">Ranking de productos más vendidos por categoría y año</h3>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="objective-box">
+          <div class="objective-label">🎯 Objetivo</div>
+          <div class="objective-text">
+            Identificar cuáles son los productos con mayor volumen de ventas en cada categoría y año fiscal. Este análisis permite al equipo comercial priorizar inventario, diseñar campañas dirigidas y detectar qué líneas de producto generan mayor demanda. Usa funciones de ventana <code>RANK()</code> para obtener una clasificación relativa dentro de cada categoría.
+          </div>
+        </div>
+        <p class="explanation">
+          Se usan las tablas <strong>Sales.SalesOrderDetail</strong>, <strong>Sales.SalesOrderHeader</strong>, <strong>Production.Product</strong> y <strong>Production.ProductSubcategory / ProductCategory</strong>. La función <code>RANK() OVER (PARTITION BY ...)</code> clasifica los productos dentro de cada categoría según la cantidad total vendida, permitiendo extraer sólo el TOP N por grupo.
+        </p>
+        <div class="result-tags">
+          <span class="rtag">SalesOrderDetail</span>
+          <span class="rtag">Product</span>
+          <span class="rtag">ProductCategory</span>
+          <span class="rtag">Window Functions</span>
+        </div>
+        <br>
+        <div class="code-wrapper">
+          <div class="code-label">
+            <span class="code-lang">T-SQL</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="cm">-- ============================================================
+-- EJEMPLO 1: Ranking de productos más vendidos por categoría
+-- Base: AdventureWorks2022
+-- ============================================================</span>
+
+<span class="kw">WITH</span> <span class="al">VentasPorProducto</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        pc.Name                              <span class="kw">AS</span> <span class="al">Categoria</span>,
+        p.Name                               <span class="kw">AS</span> <span class="al">Producto</span>,
+        <span class="fn">YEAR</span>(soh.OrderDate)                  <span class="kw">AS</span> <span class="al">Anio</span>,
+        <span class="fn">SUM</span>(sod.OrderQty)                    <span class="kw">AS</span> <span class="al">TotalUnidades</span>,
+        <span class="fn">SUM</span>(sod.LineTotal)                   <span class="kw">AS</span> <span class="al">TotalIngresos</span>
+    <span class="kw">FROM</span> <span class="tb">Sales.SalesOrderDetail</span>    sod
+    <span class="kw">JOIN</span> <span class="tb">Sales.SalesOrderHeader</span>    soh  <span class="kw">ON</span> sod.SalesOrderID  <span class="op">=</span> soh.SalesOrderID
+    <span class="kw">JOIN</span> <span class="tb">Production.Product</span>         p    <span class="kw">ON</span> sod.ProductID     <span class="op">=</span> p.ProductID
+    <span class="kw">JOIN</span> <span class="tb">Production.ProductSubcategory</span> ps <span class="kw">ON</span> p.ProductSubcategoryID <span class="op">=</span> ps.ProductSubcategoryID
+    <span class="kw">JOIN</span> <span class="tb">Production.ProductCategory</span>  pc   <span class="kw">ON</span> ps.ProductCategoryID <span class="op">=</span> pc.ProductCategoryID
+    <span class="kw">GROUP BY</span> pc.Name, p.Name, <span class="fn">YEAR</span>(soh.OrderDate)
+),
+<span class="al">Ranking</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        Categoria, Producto, Anio,
+        TotalUnidades, TotalIngresos,
+        <span class="fn">RANK</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> Categoria, Anio
+            <span class="kw">ORDER BY</span> TotalUnidades <span class="kw">DESC</span>
+        ) <span class="kw">AS</span> <span class="al">Posicion</span>
+    <span class="kw">FROM</span> VentasPorProducto
+)
+<span class="kw">SELECT</span>
+    Anio,
+    Categoria,
+    Posicion,
+    Producto,
+    TotalUnidades,
+    <span class="fn">FORMAT</span>(TotalIngresos, <span class="str">'C'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">Ingresos</span>
+<span class="kw">FROM</span> Ranking
+<span class="kw">WHERE</span> Posicion <span class="op">&lt;=</span> <span class="num">5</span>   <span class="cm">-- Top 5 por categoría y año</span>
+<span class="kw">ORDER BY</span> Anio, Categoria, Posicion;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- EJEMPLO 2 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="example-card" id="ej2">
+      <div class="card-stripe stripe-2"></div>
+      <div class="card-header">
+        <div class="card-number">02</div>
+        <div class="card-meta">
+          <div class="card-tag tag-teal">Segmentación · Comportamiento de Compra</div>
+          <h3 class="card-title">Segmentación de clientes por frecuencia y valor de compra</h3>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="objective-box">
+          <div class="objective-label">🎯 Objetivo</div>
+          <div class="objective-text">
+            Clasificar a los clientes en segmentos (Alto, Medio, Bajo) según la frecuencia de sus pedidos y el gasto total acumulado. Esta técnica de segmentación permite al área de marketing personalizar ofertas, identificar clientes VIP y diseñar programas de fidelización basados en datos reales de comportamiento.
+          </div>
+        </div>
+        <p class="explanation">
+          Se emplean <strong>Sales.Customer</strong>, <strong>Sales.SalesOrderHeader</strong> y <strong>Person.Person</strong>. Con <code>NTILE(3)</code> se divide la distribución de clientes en tres tercios según gasto y frecuencia, generando una segmentación automática sin necesidad de umbrales manuales.
+        </p>
+        <div class="result-tags">
+          <span class="rtag">Customer</span>
+          <span class="rtag">SalesOrderHeader</span>
+          <span class="rtag">NTILE</span>
+          <span class="rtag">Segmentación</span>
+        </div>
+        <br>
+        <div class="code-wrapper">
+          <div class="code-label">
+            <span class="code-lang">T-SQL</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="cm">-- ============================================================
+-- EJEMPLO 2: Segmentación de clientes por frecuencia y valor
+-- ============================================================</span>
+
+<span class="kw">WITH</span> <span class="al">MetricasCliente</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        c.CustomerID,
+        <span class="fn">ISNULL</span>(p.FirstName <span class="op">+</span> <span class="str">' '</span> <span class="op">+</span> p.LastName, <span class="str">'Cliente Empresa'</span>) <span class="kw">AS</span> <span class="al">NombreCliente</span>,
+        <span class="fn">COUNT</span>(soh.SalesOrderID)   <span class="kw">AS</span> <span class="al">TotalPedidos</span>,
+        <span class="fn">SUM</span>(soh.TotalDue)         <span class="kw">AS</span> <span class="al">GastoTotal</span>,
+        <span class="fn">AVG</span>(soh.TotalDue)         <span class="kw">AS</span> <span class="al">TicketPromedio</span>,
+        <span class="fn">MIN</span>(soh.OrderDate)        <span class="kw">AS</span> <span class="al">PrimerPedido</span>,
+        <span class="fn">MAX</span>(soh.OrderDate)        <span class="kw">AS</span> <span class="al">UltimoPedido</span>
+    <span class="kw">FROM</span> <span class="tb">Sales.Customer</span>       c
+    <span class="kw">JOIN</span> <span class="tb">Sales.SalesOrderHeader</span> soh <span class="kw">ON</span> c.CustomerID <span class="op">=</span> soh.CustomerID
+    <span class="kw">LEFT JOIN</span> <span class="tb">Person.Person</span>    p   <span class="kw">ON</span> c.PersonID   <span class="op">=</span> p.BusinessEntityID
+    <span class="kw">GROUP BY</span> c.CustomerID, p.FirstName, p.LastName
+),
+<span class="al">Segmentado</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        CustomerID, NombreCliente,
+        TotalPedidos, GastoTotal, TicketPromedio,
+        PrimerPedido, UltimoPedido,
+        <span class="fn">NTILE</span>(<span class="num">3</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> GastoTotal  <span class="kw">DESC</span>) <span class="kw">AS</span> <span class="al">TercilGasto</span>,
+        <span class="fn">NTILE</span>(<span class="num">3</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> TotalPedidos <span class="kw">DESC</span>) <span class="kw">AS</span> <span class="al">TercilFrecuencia</span>
+    <span class="kw">FROM</span> MetricasCliente
+)
+<span class="kw">SELECT</span>
+    CustomerID,
+    NombreCliente,
+    TotalPedidos,
+    <span class="fn">FORMAT</span>(GastoTotal,    <span class="str">'C'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">GastoTotal</span>,
+    <span class="fn">FORMAT</span>(TicketPromedio,<span class="str">'C'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">TicketPromedio</span>,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> TercilGasto <span class="op">=</span> <span class="num">1</span> <span class="kw">AND</span> TercilFrecuencia <span class="op">=</span> <span class="num">1</span> <span class="kw">THEN</span> <span class="str">'⭐ VIP - Alto Valor'</span>
+        <span class="kw">WHEN</span> TercilGasto <span class="op">=</span> <span class="num">1</span>                           <span class="kw">THEN</span> <span class="str">'💎 Alto Valor'</span>
+        <span class="kw">WHEN</span> TercilFrecuencia <span class="op">=</span> <span class="num">1</span>                      <span class="kw">THEN</span> <span class="str">'🔄 Alta Frecuencia'</span>
+        <span class="kw">WHEN</span> TercilGasto <span class="op">=</span> <span class="num">2</span> <span class="kw">OR</span>  TercilFrecuencia <span class="op">=</span> <span class="num">2</span>  <span class="kw">THEN</span> <span class="str">'📊 Valor Medio'</span>
+        <span class="kw">ELSE</span> <span class="str">'📉 Bajo Valor'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> <span class="al">Segmento</span>,
+    PrimerPedido, UltimoPedido
+<span class="kw">FROM</span> Segmentado
+<span class="kw">ORDER BY</span> GastoTotal <span class="kw">DESC</span>;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- EJEMPLO 3 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="example-card" id="ej3">
+      <div class="card-stripe stripe-3"></div>
+      <div class="card-header">
+        <div class="card-number">03</div>
+        <div class="card-meta">
+          <div class="card-tag tag-red">Análisis de Cesta · Market Basket</div>
+          <h3 class="card-title">Productos comprados frecuentemente juntos (Market Basket)</h3>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="objective-box">
+          <div class="objective-label">🎯 Objetivo</div>
+          <div class="objective-text">
+            Descubrir pares de productos que los clientes tienden a adquirir en el mismo pedido. Este análisis de asociación es la base del sistema de recomendación "los clientes también compraron…". Permite optimizar la distribución física en tiendas, los bundles de productos y las campañas de venta cruzada (cross-selling).
+          </div>
+        </div>
+        <p class="explanation">
+          Técnica clásica de <strong>Market Basket Analysis</strong>. Se hace un auto-join de <strong>Sales.SalesOrderDetail</strong> sobre sí misma para encontrar pares de productos distintos dentro del mismo <code>SalesOrderID</code>. Se calcula el <strong>soporte</strong> (frecuencia absoluta de co-ocurrencia) y se filtra por el umbral mínimo de apariciones.
+        </p>
+        <div class="result-tags">
+          <span class="rtag">SalesOrderDetail</span>
+          <span class="rtag">Self-Join</span>
+          <span class="rtag">Association Rules</span>
+          <span class="rtag">Cross-Sell</span>
+        </div>
+        <br>
+        <div class="code-wrapper">
+          <div class="code-label">
+            <span class="code-lang">T-SQL</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="cm">-- ============================================================
+-- EJEMPLO 3: Market Basket Analysis (pares de productos)
+-- ============================================================</span>
+
+<span class="kw">WITH</span> <span class="al">ParesProducto</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        a.SalesOrderID,
+        p1.Name     <span class="kw">AS</span> <span class="al">ProductoA</span>,
+        p2.Name     <span class="kw">AS</span> <span class="al">ProductoB</span>
+    <span class="kw">FROM</span>       <span class="tb">Sales.SalesOrderDetail</span> a
+    <span class="kw">JOIN</span>       <span class="tb">Sales.SalesOrderDetail</span> b
+        <span class="kw">ON</span>  a.SalesOrderID <span class="op">=</span> b.SalesOrderID
+        <span class="kw">AND</span> a.ProductID    <span class="op">&lt;</span> b.ProductID   <span class="cm">-- evitar duplicados y autopares</span>
+    <span class="kw">JOIN</span> <span class="tb">Production.Product</span> p1 <span class="kw">ON</span> a.ProductID <span class="op">=</span> p1.ProductID
+    <span class="kw">JOIN</span> <span class="tb">Production.Product</span> p2 <span class="kw">ON</span> b.ProductID <span class="op">=</span> p2.ProductID
+),
+<span class="al">Frecuencia</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        ProductoA,
+        ProductoB,
+        <span class="fn">COUNT</span>(*) <span class="kw">AS</span> <span class="al">VecesJuntos</span>
+    <span class="kw">FROM</span> ParesProducto
+    <span class="kw">GROUP BY</span> ProductoA, ProductoB
+),
+<span class="al">TotalOrdenes</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> SalesOrderID) <span class="kw">AS</span> <span class="al">Total</span>
+    <span class="kw">FROM</span> <span class="tb">Sales.SalesOrderHeader</span>
+)
+<span class="kw">SELECT</span>
+    f.ProductoA,
+    f.ProductoB,
+    f.VecesJuntos,
+    <span class="fn">CAST</span>(f.VecesJuntos <span class="op">*</span> <span class="num">100.0</span> <span class="op">/</span> t.Total <span class="kw">AS</span> <span class="kw">DECIMAL</span>(<span class="num">5</span>,<span class="num">2</span>)) <span class="kw">AS</span> <span class="al">SoportePct</span>
+<span class="kw">FROM</span> Frecuencia f
+<span class="kw">CROSS JOIN</span> TotalOrdenes t
+<span class="kw">WHERE</span> f.VecesJuntos <span class="op">&gt;=</span> <span class="num">50</span>   <span class="cm">-- soporte mínimo de 50 co-ocurrencias</span>
+<span class="kw">ORDER BY</span> f.VecesJuntos <span class="kw">DESC</span>
+<span class="kw">OFFSET</span> <span class="num">0</span> <span class="kw">ROWS FETCH NEXT</span> <span class="num">30</span> <span class="kw">ROWS ONLY</span>;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- EJEMPLO 4 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="example-card" id="ej4">
+      <div class="card-stripe stripe-4"></div>
+      <div class="card-header">
+        <div class="card-number">04</div>
+        <div class="card-meta">
+          <div class="card-tag tag-purple">Modelo RFM · Análisis de Valor de Cliente</div>
+          <h3 class="card-title">Modelo RFM: Recencia, Frecuencia y Valor Monetario</h3>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="objective-box">
+          <div class="objective-label">🎯 Objetivo</div>
+          <div class="objective-text">
+            Aplicar el modelo RFM (Recency, Frequency, Monetary) para calificar a cada cliente en tres dimensiones clave: cuándo compró por última vez, con qué frecuencia compra y cuánto dinero gasta. La combinación de estas tres puntuaciones produce un perfil integral del valor de cada cliente y permite priorizar acciones de retención y reactivación.
+          </div>
+        </div>
+        <p class="explanation">
+          El modelo RFM es un estándar en CRM y marketing analítico. Se calcula la <strong>Recencia</strong> como días transcurridos desde el último pedido, la <strong>Frecuencia</strong> como número total de órdenes y el <strong>Valor Monetario</strong> como suma de ingresos. Luego <code>NTILE(5)</code> puntúa cada dimensión del 1 al 5, y la suma de los tres puntajes da una calificación global del cliente.
+        </p>
+        <div class="result-tags">
+          <span class="rtag">RFM</span>
+          <span class="rtag">Customer Lifetime Value</span>
+          <span class="rtag">NTILE(5)</span>
+          <span class="rtag">CRM</span>
+        </div>
+        <br>
+        <div class="code-wrapper">
+          <div class="code-label">
+            <span class="code-lang">T-SQL</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="cm">-- ============================================================
+-- EJEMPLO 4: Modelo RFM completo
+-- ============================================================</span>
+
+<span class="kw">DECLARE</span> @FechaRef <span class="kw">DATE</span> <span class="op">=</span> (<span class="kw">SELECT</span> <span class="fn">MAX</span>(OrderDate) <span class="kw">FROM</span> <span class="tb">Sales.SalesOrderHeader</span>);
+
+<span class="kw">WITH</span> <span class="al">BaseRFM</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        c.CustomerID,
+        <span class="fn">ISNULL</span>(p.FirstName <span class="op">+</span> <span class="str">' '</span> <span class="op">+</span> p.LastName, <span class="str">'Empresa'</span>) <span class="kw">AS</span> <span class="al">Cliente</span>,
+        <span class="fn">DATEDIFF</span>(<span class="kw">DAY</span>, <span class="fn">MAX</span>(soh.OrderDate), @FechaRef) <span class="kw">AS</span> <span class="al">Recencia</span>,
+        <span class="fn">COUNT</span>(soh.SalesOrderID)                         <span class="kw">AS</span> <span class="al">Frecuencia</span>,
+        <span class="fn">SUM</span>(soh.TotalDue)                               <span class="kw">AS</span> <span class="al">Monetario</span>
+    <span class="kw">FROM</span> <span class="tb">Sales.Customer</span>        c
+    <span class="kw">JOIN</span> <span class="tb">Sales.SalesOrderHeader</span> soh <span class="kw">ON</span> c.CustomerID <span class="op">=</span> soh.CustomerID
+    <span class="kw">LEFT JOIN</span> <span class="tb">Person.Person</span>    p   <span class="kw">ON</span> c.PersonID   <span class="op">=</span> p.BusinessEntityID
+    <span class="kw">GROUP BY</span> c.CustomerID, p.FirstName, p.LastName
+),
+<span class="al">Puntajes</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        CustomerID, Cliente, Recencia, Frecuencia, Monetario,
+        <span class="cm">-- Recencia: menor días = mejor puntaje (invertido)</span>
+        <span class="num">6</span> <span class="op">-</span> <span class="fn">NTILE</span>(<span class="num">5</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> Recencia  <span class="kw">DESC</span>) <span class="kw">AS</span> <span class="al">R_Score</span>,
+        <span class="fn">NTILE</span>(<span class="num">5</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> Frecuencia <span class="kw">ASC</span>)  <span class="kw">AS</span> <span class="al">F_Score</span>,
+        <span class="fn">NTILE</span>(<span class="num">5</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> Monetario  <span class="kw">ASC</span>)  <span class="kw">AS</span> <span class="al">M_Score</span>
+    <span class="kw">FROM</span> BaseRFM
+)
+<span class="kw">SELECT</span>
+    CustomerID,
+    Cliente,
+    Recencia    <span class="kw">AS</span> <span class="al">Dias_UltimaCompra</span>,
+    Frecuencia  <span class="kw">AS</span> <span class="al">Num_Pedidos</span>,
+    <span class="fn">FORMAT</span>(Monetario, <span class="str">'C'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">Gasto_Total</span>,
+    R_Score, F_Score, M_Score,
+    R_Score <span class="op">+</span> F_Score <span class="op">+</span> M_Score       <span class="kw">AS</span> <span class="al">RFM_Total</span>,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> R_Score <span class="op">+</span> F_Score <span class="op">+</span> M_Score <span class="op">&gt;=</span> <span class="num">13</span> <span class="kw">THEN</span> <span class="str">'🏆 Champions'</span>
+        <span class="kw">WHEN</span> R_Score <span class="op">+</span> F_Score <span class="op">+</span> M_Score <span class="op">&gt;=</span> <span class="num">10</span> <span class="kw">THEN</span> <span class="str">'💰 Loyal Customers'</span>
+        <span class="kw">WHEN</span> R_Score <span class="op">&gt;=</span> <span class="num">4</span>                       <span class="kw">THEN</span> <span class="str">'🆕 Recent Customers'</span>
+        <span class="kw">WHEN</span> F_Score <span class="op">&gt;=</span> <span class="num">4</span>                       <span class="kw">THEN</span> <span class="str">'🔄 Frequent Buyers'</span>
+        <span class="kw">WHEN</span> R_Score <span class="op">&lt;=</span> <span class="num">2</span>                       <span class="kw">THEN</span> <span class="str">'😴 At Risk'</span>
+        <span class="kw">ELSE</span>                                          <span class="str">'📊 Occasional'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> <span class="al">Segmento_RFM</span>
+<span class="kw">FROM</span> Puntajes
+<span class="kw">ORDER BY</span> RFM_Total <span class="kw">DESC</span>;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- EJEMPLO 5 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="example-card" id="ej5">
+      <div class="card-stripe stripe-5"></div>
+      <div class="card-header">
+        <div class="card-number">05</div>
+        <div class="card-meta">
+          <div class="card-tag tag-orange">Series Temporales · Tendencias</div>
+          <h3 class="card-title">Análisis de tendencias mensuales con media móvil</h3>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="objective-box">
+          <div class="objective-label">🎯 Objetivo</div>
+          <div class="objective-text">
+            Visualizar la evolución de ventas mes a mes e identificar tendencias de crecimiento o caída utilizando medias móviles de 3 meses. Este análisis temporal permite detectar estacionalidades, picos de demanda y períodos de contracción para planificar producción, inventario y presupuesto con mayor precisión.
+          </div>
+        </div>
+        <p class="explanation">
+          Las funciones de ventana <code>AVG() OVER (ORDER BY ... ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)</code> calculan la media móvil sin necesidad de subconsultas complejas. También se calcula el <strong>crecimiento porcentual</strong> mes a mes usando <code>LAG()</code> para comparar con el período anterior.
+        </p>
+        <div class="result-tags">
+          <span class="rtag">SalesOrderHeader</span>
+          <span class="rtag">Moving Average</span>
+          <span class="rtag">LAG()</span>
+          <span class="rtag">Time Series</span>
+        </div>
+        <br>
+        <div class="code-wrapper">
+          <div class="code-label">
+            <span class="code-lang">T-SQL</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="cm">-- ============================================================
+-- EJEMPLO 5: Tendencias mensuales con media móvil de 3 meses
+-- ============================================================</span>
+
+<span class="kw">WITH</span> <span class="al">VentasMensuales</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">YEAR</span>(OrderDate)                <span class="kw">AS</span> <span class="al">Anio</span>,
+        <span class="fn">MONTH</span>(OrderDate)               <span class="kw">AS</span> <span class="al">Mes</span>,
+        <span class="fn">FORMAT</span>(OrderDate, <span class="str">'yyyy-MM'</span>)   <span class="kw">AS</span> <span class="al">Periodo</span>,
+        <span class="fn">COUNT</span>(SalesOrderID)            <span class="kw">AS</span> <span class="al">NumOrdenes</span>,
+        <span class="fn">SUM</span>(TotalDue)                  <span class="kw">AS</span> <span class="al">VentasBrutas</span>,
+        <span class="fn">SUM</span>(SubTotal)                  <span class="kw">AS</span> <span class="al">SubTotal</span>,
+        <span class="fn">SUM</span>(Freight)                   <span class="kw">AS</span> <span class="al">CostoEnvio</span>
+    <span class="kw">FROM</span> <span class="tb">Sales.SalesOrderHeader</span>
+    <span class="kw">WHERE</span> Status <span class="op">=</span> <span class="num">5</span>   <span class="cm">-- solo órdenes aprobadas</span>
+    <span class="kw">GROUP BY</span> <span class="fn">YEAR</span>(OrderDate), <span class="fn">MONTH</span>(OrderDate), <span class="fn">FORMAT</span>(OrderDate, <span class="str">'yyyy-MM'</span>)
+),
+<span class="al">ConMediaMovil</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        Periodo, Anio, Mes,
+        NumOrdenes, VentasBrutas, SubTotal, CostoEnvio,
+        <span class="fn">AVG</span>(VentasBrutas) <span class="kw">OVER</span> (
+            <span class="kw">ORDER BY</span> Anio, Mes
+            <span class="kw">ROWS BETWEEN</span> <span class="num">2</span> <span class="kw">PRECEDING AND CURRENT ROW</span>
+        ) <span class="kw">AS</span> <span class="al">MediaMovil3M</span>,
+        <span class="fn">LAG</span>(VentasBrutas, <span class="num">1</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> Anio, Mes) <span class="kw">AS</span> <span class="al">MesAnterior</span>
+    <span class="kw">FROM</span> VentasMensuales
+)
+<span class="kw">SELECT</span>
+    Periodo,
+    NumOrdenes,
+    <span class="fn">FORMAT</span>(VentasBrutas, <span class="str">'C0'</span>, <span class="str">'en-US'</span>)  <span class="kw">AS</span> <span class="al">VentasBrutas</span>,
+    <span class="fn">FORMAT</span>(MediaMovil3M, <span class="str">'C0'</span>, <span class="str">'en-US'</span>)  <span class="kw">AS</span> <span class="al">MediaMovil_3M</span>,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> MesAnterior <span class="kw">IS</span> <span class="kw">NULL</span>         <span class="kw">THEN</span> <span class="str">'N/A'</span>
+        <span class="kw">WHEN</span> MesAnterior <span class="op">=</span> <span class="num">0</span>             <span class="kw">THEN</span> <span class="str">'∞'</span>
+        <span class="kw">ELSE</span> <span class="fn">FORMAT</span>(
+                (VentasBrutas <span class="op">-</span> MesAnterior) <span class="op">*</span> <span class="num">100.0</span> <span class="op">/</span> MesAnterior,
+                <span class="str">'N2'</span>
+             ) <span class="op">+</span> <span class="str">'%'</span>
+    <span class="kw">END</span>     <span class="kw">AS</span> <span class="al">CrecimientoMoM</span>,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> VentasBrutas <span class="op">&gt;</span> MediaMovil3M <span class="kw">THEN</span> <span class="str">'📈 Por encima de media'</span>
+        <span class="kw">WHEN</span> VentasBrutas <span class="op">&lt;</span> MediaMovil3M <span class="kw">THEN</span> <span class="str">'📉 Por debajo de media'</span>
+        <span class="kw">ELSE</span>                                   <span class="str">'➡️ En línea con media'</span>
+    <span class="kw">END</span>     <span class="kw">AS</span> <span class="al">Tendencia</span>
+<span class="kw">FROM</span> ConMediaMovil
+<span class="kw">ORDER BY</span> Anio, Mes;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- EJEMPLO 6 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="example-card" id="ej6">
+      <div class="card-stripe stripe-6"></div>
+      <div class="card-header">
+        <div class="card-number">06</div>
+        <div class="card-meta">
+          <div class="card-tag tag-green">Análisis ABC · Rentabilidad</div>
+          <h3 class="card-title">Clasificación ABC de productos por margen de rentabilidad</h3>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="objective-box">
+          <div class="objective-label">🎯 Objetivo</div>
+          <div class="objective-text">
+            Aplicar el análisis de Pareto (regla 80/20) para clasificar los productos en categorías A, B y C según su contribución al margen total. Los productos A generan el 80% del margen con el 20% del catálogo. Esta clasificación orienta decisiones de producción, descuentos, discontinuación de productos y gestión de inventario.
+          </div>
+        </div>
+        <p class="explanation">
+          Se calcula el margen unitario como la diferencia entre el precio de lista y el costo estándar. Luego <code>SUM() OVER (ORDER BY ... ROWS UNBOUNDED PRECEDING)</code> acumula el porcentaje progresivo, clasificando como <strong>A</strong> los primeros productos que alcanzan el 80% del margen acumulado, <strong>B</strong> hasta el 95%, y el resto como <strong>C</strong>.
+        </p>
+        <div class="result-tags">
+          <span class="rtag">Product</span>
+          <span class="rtag">SalesOrderDetail</span>
+          <span class="rtag">Pareto ABC</span>
+          <span class="rtag">Running Total</span>
+        </div>
+        <br>
+        <div class="code-wrapper">
+          <div class="code-label">
+            <span class="code-lang">T-SQL</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="cm">-- ============================================================
+-- EJEMPLO 6: Análisis ABC de rentabilidad de productos
+-- ============================================================</span>
+
+<span class="kw">WITH</span> <span class="al">MargenProducto</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        p.ProductID,
+        p.Name                                         <span class="kw">AS</span> <span class="al">Producto</span>,
+        p.ListPrice,
+        p.StandardCost,
+        p.ListPrice <span class="op">-</span> p.StandardCost                  <span class="kw">AS</span> <span class="al">MargenUnitario</span>,
+        <span class="fn">SUM</span>(sod.OrderQty)                              <span class="kw">AS</span> <span class="al">UnidadesVendidas</span>,
+        <span class="fn">SUM</span>(sod.OrderQty <span class="op">*</span> (p.ListPrice <span class="op">-</span> p.StandardCost)) <span class="kw">AS</span> <span class="al">MargenTotal</span>
+    <span class="kw">FROM</span> <span class="tb">Production.Product</span>      p
+    <span class="kw">JOIN</span> <span class="tb">Sales.SalesOrderDetail</span>  sod <span class="kw">ON</span> p.ProductID <span class="op">=</span> sod.ProductID
+    <span class="kw">WHERE</span> p.StandardCost <span class="op">&gt;</span> <span class="num">0</span>
+      <span class="kw">AND</span> p.ListPrice     <span class="op">&gt;</span> p.StandardCost
+    <span class="kw">GROUP BY</span> p.ProductID, p.Name, p.ListPrice, p.StandardCost
+),
+<span class="al">Acumulado</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        ProductID, Producto, ListPrice, StandardCost,
+        MargenUnitario, UnidadesVendidas, MargenTotal,
+        <span class="fn">SUM</span>(MargenTotal) <span class="kw">OVER</span> ()                       <span class="kw">AS</span> <span class="al">MargenGlobal</span>,
+        <span class="fn">SUM</span>(MargenTotal) <span class="kw">OVER</span> (
+            <span class="kw">ORDER BY</span> MargenTotal <span class="kw">DESC</span>
+            <span class="kw">ROWS UNBOUNDED PRECEDING</span>
+        ) <span class="kw">AS</span> <span class="al">MargenAcumulado</span>
+    <span class="kw">FROM</span> MargenProducto
+)
+<span class="kw">SELECT</span>
+    ProductID,
+    Producto,
+    <span class="fn">FORMAT</span>(ListPrice,     <span class="str">'C'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">PrecioLista</span>,
+    <span class="fn">FORMAT</span>(StandardCost, <span class="str">'C'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">Costo</span>,
+    <span class="fn">FORMAT</span>(MargenUnitario,<span class="str">'C'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">MargenUnitario</span>,
+    UnidadesVendidas,
+    <span class="fn">FORMAT</span>(MargenTotal,   <span class="str">'C0'</span>,<span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">MargenTotal</span>,
+    <span class="fn">FORMAT</span>(MargenAcumulado <span class="op">*</span> <span class="num">100.0</span> <span class="op">/</span> MargenGlobal, <span class="str">'N1'</span>) <span class="op">+</span> <span class="str">'%'</span> <span class="kw">AS</span> <span class="al">PctAcumulado</span>,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> MargenAcumulado <span class="op">&lt;=</span> MargenGlobal <span class="op">*</span> <span class="num">0.80</span> <span class="kw">THEN</span> <span class="str">'🅐  A - Crítico'</span>
+        <span class="kw">WHEN</span> MargenAcumulado <span class="op">&lt;=</span> MargenGlobal <span class="op">*</span> <span class="num">0.95</span> <span class="kw">THEN</span> <span class="str">'🅑  B - Importante'</span>
+        <span class="kw">ELSE</span>                                           <span class="str">'🅒  C - Marginal'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> <span class="al">ClasificacionABC</span>
+<span class="kw">FROM</span> Acumulado
+<span class="kw">ORDER BY</span> MargenTotal <span class="kw">DESC</span>;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- EJEMPLO 7 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="example-card" id="ej7">
+      <div class="card-stripe stripe-7"></div>
+      <div class="card-header">
+        <div class="card-number">07</div>
+        <div class="card-meta">
+          <div class="card-tag tag-pink">RRHH · Análisis de Desempeño</div>
+          <h3 class="card-title">Análisis de rendimiento de vendedores con cuota vs real</h3>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="objective-box">
+          <div class="objective-label">🎯 Objetivo</div>
+          <div class="objective-text">
+            Evaluar el desempeño de cada vendedor comparando las ventas reales contra la cuota asignada, calculando el porcentaje de cumplimiento y clasificando su rendimiento. Este análisis es clave para decisiones de compensación, bonificaciones, capacitación y planificación de la fuerza de ventas.
+          </div>
+        </div>
+        <p class="explanation">
+          Se cruzan <strong>Sales.SalesPerson</strong>, <strong>Sales.SalesPersonQuotaHistory</strong> y <strong>Sales.SalesOrderHeader</strong>. El porcentaje de cumplimiento revela quiénes superan su cuota (high performers), quiénes están en riesgo y quiénes necesitan apoyo, permitiendo estrategias de coaching diferenciadas.
+        </p>
+        <div class="result-tags">
+          <span class="rtag">SalesPerson</span>
+          <span class="rtag">SalesPersonQuotaHistory</span>
+          <span class="rtag">Performance</span>
+          <span class="rtag">KPI</span>
+        </div>
+        <br>
+        <div class="code-wrapper">
+          <div class="code-label">
+            <span class="code-lang">T-SQL</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="cm">-- ============================================================
+-- EJEMPLO 7: Rendimiento de vendedores (cuota vs real)
+-- ============================================================</span>
+
+<span class="kw">WITH</span> <span class="al">VentasReales</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        soh.SalesPersonID,
+        <span class="fn">YEAR</span>(soh.OrderDate)    <span class="kw">AS</span> <span class="al">Anio</span>,
+        <span class="fn">MONTH</span>(soh.OrderDate)   <span class="kw">AS</span> <span class="al">Mes</span>,
+        <span class="fn">SUM</span>(soh.SubTotal)      <span class="kw">AS</span> <span class="al">VentaReal</span>,
+        <span class="fn">COUNT</span>(soh.SalesOrderID)<span class="kw">AS</span> <span class="al">NumPedidos</span>
+    <span class="kw">FROM</span> <span class="tb">Sales.SalesOrderHeader</span> soh
+    <span class="kw">WHERE</span> soh.SalesPersonID <span class="kw">IS NOT NULL</span>
+    <span class="kw">GROUP BY</span> soh.SalesPersonID, <span class="fn">YEAR</span>(soh.OrderDate), <span class="fn">MONTH</span>(soh.OrderDate)
+),
+<span class="al">Cuotas</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        BusinessEntityID <span class="kw">AS</span> <span class="al">SalesPersonID</span>,
+        <span class="fn">YEAR</span>(QuotaDate)  <span class="kw">AS</span> <span class="al">Anio</span>,
+        <span class="fn">MONTH</span>(QuotaDate) <span class="kw">AS</span> <span class="al">Mes</span>,
+        SalesQuota       <span class="kw">AS</span> <span class="al">CuotaAsignada</span>
+    <span class="kw">FROM</span> <span class="tb">Sales.SalesPersonQuotaHistory</span>
+)
+<span class="kw">SELECT</span>
+    p.FirstName <span class="op">+</span> <span class="str">' '</span> <span class="op">+</span> p.LastName       <span class="kw">AS</span> <span class="al">Vendedor</span>,
+    e.JobTitle,
+    vr.Anio,
+    vr.Mes,
+    vr.NumPedidos,
+    <span class="fn">FORMAT</span>(c.CuotaAsignada, <span class="str">'C0'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">Cuota</span>,
+    <span class="fn">FORMAT</span>(vr.VentaReal,    <span class="str">'C0'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">VentaReal</span>,
+    <span class="fn">FORMAT</span>(vr.VentaReal <span class="op">-</span> c.CuotaAsignada, <span class="str">'C0'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">Diferencia</span>,
+    <span class="fn">FORMAT</span>(vr.VentaReal <span class="op">*</span> <span class="num">100.0</span> <span class="op">/</span> <span class="fn">NULLIF</span>(c.CuotaAsignada,<span class="num">0</span>), <span class="str">'N1'</span>) <span class="op">+</span> <span class="str">'%'</span>
+        <span class="kw">AS</span> <span class="al">PctCumplimiento</span>,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> vr.VentaReal <span class="op">&gt;=</span> c.CuotaAsignada <span class="op">*</span> <span class="num">1.20</span> <span class="kw">THEN</span> <span class="str">'🌟 Excepcional'</span>
+        <span class="kw">WHEN</span> vr.VentaReal <span class="op">&gt;=</span> c.CuotaAsignada           <span class="kw">THEN</span> <span class="str">'✅ Cumplió cuota'</span>
+        <span class="kw">WHEN</span> vr.VentaReal <span class="op">&gt;=</span> c.CuotaAsignada <span class="op">*</span> <span class="num">0.80</span> <span class="kw">THEN</span> <span class="str">'⚠️ En riesgo'</span>
+        <span class="kw">ELSE</span>                                              <span class="str">'🔴 Bajo cuota'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> <span class="al">Estado</span>
+<span class="kw">FROM</span> VentasReales      vr
+<span class="kw">JOIN</span> Cuotas            c   <span class="kw">ON</span> vr.SalesPersonID <span class="op">=</span> c.SalesPersonID
+                        <span class="kw">AND</span> vr.Anio           <span class="op">=</span> c.Anio
+                        <span class="kw">AND</span> vr.Mes            <span class="op">=</span> c.Mes
+<span class="kw">JOIN</span> <span class="tb">HumanResources.Employee</span> e <span class="kw">ON</span> vr.SalesPersonID <span class="op">=</span> e.BusinessEntityID
+<span class="kw">JOIN</span> <span class="tb">Person.Person</span>           p <span class="kw">ON</span> vr.SalesPersonID <span class="op">=</span> p.BusinessEntityID
+<span class="kw">ORDER BY</span> vr.Anio, vr.Mes, vr.VentaReal <span class="kw">DESC</span>;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- EJEMPLO 8 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="example-card" id="ej8">
+      <div class="card-stripe stripe-8"></div>
+      <div class="card-header">
+        <div class="card-number">08</div>
+        <div class="card-meta">
+          <div class="card-tag tag-blue">Análisis Geográfico · Geodata</div>
+          <h3 class="card-title">Mapa de calor de ventas por territorio y región geográfica</h3>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="objective-box">
+          <div class="objective-label">🎯 Objetivo</div>
+          <div class="objective-text">
+            Analizar la distribución geográfica de las ventas para identificar los territorios de mayor y menor rendimiento. Este análisis permite reasignar recursos comerciales, abrir nuevas oficinas de ventas, definir estrategias de penetración de mercado regional y optimizar los costos logísticos de envío.
+          </div>
+        </div>
+        <p class="explanation">
+          Combina <strong>Sales.SalesTerritory</strong>, <strong>Sales.SalesOrderHeader</strong> y datos de dirección (<strong>Person.Address</strong>, <strong>Person.StateProvince</strong>, <strong>Person.CountryRegion</strong>) para construir una vista completa del desempeño por región, incluyendo el ratio ventas/pedido como indicador de ticket promedio territorial.
+        </p>
+        <div class="result-tags">
+          <span class="rtag">SalesTerritory</span>
+          <span class="rtag">Address</span>
+          <span class="rtag">CountryRegion</span>
+          <span class="rtag">Geo Analytics</span>
+        </div>
+        <br>
+        <div class="code-wrapper">
+          <div class="code-label">
+            <span class="code-lang">T-SQL</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="cm">-- ============================================================
+-- EJEMPLO 8: Ventas por territorio geográfico (mapa de calor)
+-- ============================================================</span>
+
+<span class="kw">WITH</span> <span class="al">VentasTerritorio</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        st.TerritoryID,
+        st.Name            <span class="kw">AS</span> <span class="al">Territorio</span>,
+        st.[Group]         <span class="kw">AS</span> <span class="al">Region</span>,
+        st.CountryRegionCode <span class="kw">AS</span> <span class="al">Pais</span>,
+        <span class="fn">YEAR</span>(soh.OrderDate)<span class="kw">AS</span> <span class="al">Anio</span>,
+        <span class="fn">COUNT</span>(DISTINCT soh.CustomerID)  <span class="kw">AS</span> <span class="al">ClientesUnicos</span>,
+        <span class="fn">COUNT</span>(soh.SalesOrderID)         <span class="kw">AS</span> <span class="al">TotalPedidos</span>,
+        <span class="fn">SUM</span>(soh.TotalDue)               <span class="kw">AS</span> <span class="al">VentasBrutas</span>,
+        <span class="fn">SUM</span>(soh.Freight)                <span class="kw">AS</span> <span class="al">CostoLogistico</span>
+    <span class="kw">FROM</span> <span class="tb">Sales.SalesTerritory</span>    st
+    <span class="kw">JOIN</span> <span class="tb">Sales.SalesOrderHeader</span>  soh <span class="kw">ON</span> st.TerritoryID <span class="op">=</span> soh.TerritoryID
+    <span class="kw">WHERE</span> soh.Status <span class="op">=</span> <span class="num">5</span>
+    <span class="kw">GROUP BY</span> st.TerritoryID, st.Name, st.[Group], st.CountryRegionCode,
+             <span class="fn">YEAR</span>(soh.OrderDate)
+),
+<span class="al">ConRanking</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        Territorio, Region, Pais, Anio,
+        ClientesUnicos, TotalPedidos, VentasBrutas, CostoLogistico,
+        VentasBrutas <span class="op">/</span> <span class="fn">NULLIF</span>(TotalPedidos, <span class="num">0</span>)   <span class="kw">AS</span> <span class="al">TicketPromedio</span>,
+        VentasBrutas <span class="op">/</span> <span class="fn">NULLIF</span>(ClientesUnicos, <span class="num">0</span>) <span class="kw">AS</span> <span class="al">ValorPorCliente</span>,
+        <span class="fn">RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> Anio <span class="kw">ORDER BY</span> VentasBrutas <span class="kw">DESC</span>) <span class="kw">AS</span> <span class="al">Rank_Ventas</span>,
+        <span class="fn">SUM</span>(VentasBrutas) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> Anio)                  <span class="kw">AS</span> <span class="al">TotalAnual</span>
+    <span class="kw">FROM</span> VentasTerritorio
+)
+<span class="kw">SELECT</span>
+    Anio,
+    Rank_Ventas         <span class="kw">AS</span> <span class="al">Posicion</span>,
+    Territorio,
+    Region,
+    Pais,
+    ClientesUnicos,
+    TotalPedidos,
+    <span class="fn">FORMAT</span>(VentasBrutas,     <span class="str">'C0'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">VentasBrutas</span>,
+    <span class="fn">FORMAT</span>(TicketPromedio,   <span class="str">'C0'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">TicketPromedio</span>,
+    <span class="fn">FORMAT</span>(ValorPorCliente,  <span class="str">'C0'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">ValorPorCliente</span>,
+    <span class="fn">FORMAT</span>(CostoLogistico,   <span class="str">'C0'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">CostoLogistico</span>,
+    <span class="fn">FORMAT</span>(VentasBrutas <span class="op">*</span> <span class="num">100.0</span> <span class="op">/</span> TotalAnual, <span class="str">'N1'</span>) <span class="op">+</span> <span class="str">'%'</span>
+        <span class="kw">AS</span> <span class="al">ParticipacionMercado</span>,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> Rank_Ventas <span class="op">&lt;=</span> <span class="num">3</span>  <span class="kw">THEN</span> <span class="str">'🔥 Top Tier'</span>
+        <span class="kw">WHEN</span> Rank_Ventas <span class="op">&lt;=</span> <span class="num">6</span>  <span class="kw">THEN</span> <span class="str">'📊 Mid Tier'</span>
+        <span class="kw">ELSE</span>                        <span class="str">'🌱 Crecimiento'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> <span class="al">CalorTerritorio</span>
+<span class="kw">FROM</span> ConRanking
+<span class="kw">ORDER BY</span> Anio, Rank_Ventas;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- EJEMPLO 9 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="example-card" id="ej9">
+      <div class="card-stripe stripe-9"></div>
+      <div class="card-header">
+        <div class="card-number">09</div>
+        <div class="card-meta">
+          <div class="card-tag tag-amber">Detección de Anomalías · Outliers</div>
+          <h3 class="card-title">Detección de pedidos anómalos mediante desviación estándar</h3>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="objective-box">
+          <div class="objective-label">🎯 Objetivo</div>
+          <div class="objective-text">
+            Identificar órdenes de venta cuyo monto es estadísticamente anormal (outliers) usando la regla de los 2 sigmas (Z-score). Los pedidos que superan o caen muy por debajo del promedio pueden indicar errores de captura, fraudes, descuentos no autorizados o transacciones especiales que requieren revisión manual por el equipo de control interno.
+          </div>
+        </div>
+        <p class="explanation">
+          Se calcula la <strong>media</strong> y la <strong>desviación estándar</strong> del monto de pedidos usando <code>AVG()</code> y <code>STDEV()</code> con funciones de ventana. Un pedido es anómalo si su <strong>Z-score</strong> (distancia en sigmas respecto a la media) supera ±2.0, lo que estadísticamente representa menos del 5% de la distribución normal.
+        </p>
+        <div class="result-tags">
+          <span class="rtag">SalesOrderHeader</span>
+          <span class="rtag">Z-Score</span>
+          <span class="rtag">STDEV()</span>
+          <span class="rtag">Anomaly Detection</span>
+        </div>
+        <br>
+        <div class="code-wrapper">
+          <div class="code-label">
+            <span class="code-lang">T-SQL</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="cm">-- ============================================================
+-- EJEMPLO 9: Detección de anomalías con Z-Score estadístico
+-- ============================================================</span>
+
+<span class="kw">WITH</span> <span class="al">EstadisticaBase</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        soh.SalesOrderID,
+        soh.OrderDate,
+        soh.CustomerID,
+        soh.SalesPersonID,
+        soh.TerritoryID,
+        soh.TotalDue,
+        soh.SubTotal,
+        soh.TaxAmt,
+        soh.Freight,
+        <span class="cm">-- estadísticas globales por territorio</span>
+        <span class="fn">AVG</span>(soh.TotalDue)   <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> soh.TerritoryID) <span class="kw">AS</span> <span class="al">MediaTerritorio</span>,
+        <span class="fn">STDEV</span>(soh.TotalDue) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> soh.TerritoryID) <span class="kw">AS</span> <span class="al">DesvTerritorio</span>,
+        <span class="cm">-- estadísticas globales</span>
+        <span class="fn">AVG</span>(soh.TotalDue)   <span class="kw">OVER</span> ()                             <span class="kw">AS</span> <span class="al">MediaGlobal</span>,
+        <span class="fn">STDEV</span>(soh.TotalDue) <span class="kw">OVER</span> ()                             <span class="kw">AS</span> <span class="al">DesvGlobal</span>
+    <span class="kw">FROM</span> <span class="tb">Sales.SalesOrderHeader</span> soh
+    <span class="kw">WHERE</span> soh.Status <span class="op">=</span> <span class="num">5</span>
+),
+<span class="al">ConZScore</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        SalesOrderID, OrderDate, CustomerID, SalesPersonID, TerritoryID,
+        TotalDue, SubTotal, TaxAmt, Freight,
+        MediaTerritorio, DesvTerritorio,
+        <span class="fn">ABS</span>((TotalDue <span class="op">-</span> MediaTerritorio) <span class="op">/</span> <span class="fn">NULLIF</span>(DesvTerritorio, <span class="num">0</span>)) <span class="kw">AS</span> <span class="al">ZScore_Territorio</span>,
+        <span class="fn">ABS</span>((TotalDue <span class="op">-</span> MediaGlobal)     <span class="op">/</span> <span class="fn">NULLIF</span>(DesvGlobal,     <span class="num">0</span>)) <span class="kw">AS</span> <span class="al">ZScore_Global</span>
+    <span class="kw">FROM</span> EstadisticaBase
+)
+<span class="kw">SELECT</span>
+    SalesOrderID,
+    <span class="fn">FORMAT</span>(OrderDate, <span class="str">'yyyy-MM-dd'</span>) <span class="kw">AS</span> <span class="al">Fecha</span>,
+    CustomerID,
+    <span class="fn">ISNULL</span>(<span class="fn">CAST</span>(SalesPersonID <span class="kw">AS</span> <span class="kw">VARCHAR</span>), <span class="str">'Online'</span>) <span class="kw">AS</span> <span class="al">Vendedor</span>,
+    TerritoryID,
+    <span class="fn">FORMAT</span>(TotalDue,         <span class="str">'C0'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">MontoOrden</span>,
+    <span class="fn">FORMAT</span>(MediaTerritorio,  <span class="str">'C0'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">MediaTerritorio</span>,
+    <span class="fn">FORMAT</span>(ZScore_Territorio,<span class="str">'N2'</span>)           <span class="kw">AS</span> <span class="al">ZScore_Territorio</span>,
+    <span class="fn">FORMAT</span>(ZScore_Global,    <span class="str">'N2'</span>)           <span class="kw">AS</span> <span class="al">ZScore_Global</span>,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> ZScore_Global    <span class="op">&gt;</span> <span class="num">3.0</span> <span class="kw">THEN</span> <span class="str">'🚨 Anomalía Extrema'</span>
+        <span class="kw">WHEN</span> ZScore_Territorio <span class="op">&gt;</span> <span class="num">2.5</span> <span class="kw">THEN</span> <span class="str">'⚠️  Sospechoso'</span>
+        <span class="kw">WHEN</span> ZScore_Global    <span class="op">&gt;</span> <span class="num">2.0</span> <span class="kw">THEN</span> <span class="str">'🔍 Revisar'</span>
+        <span class="kw">ELSE</span>                           <span class="str">'✅ Normal'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> <span class="al">NivelAlerta</span>
+<span class="kw">FROM</span> ConZScore
+<span class="kw">WHERE</span> ZScore_Global <span class="op">&gt;</span> <span class="num">2.0</span>   <span class="cm">-- mostrar sólo los anómalos</span>
+<span class="kw">ORDER BY</span> ZScore_Global <span class="kw">DESC</span>;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- EJEMPLO 10 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="example-card" id="ej10">
+      <div class="card-stripe stripe-10"></div>
+      <div class="card-header">
+        <div class="card-number">10</div>
+        <div class="card-meta">
+          <div class="card-tag tag-violet">Predicción · Regresión Lineal Simple</div>
+          <h3 class="card-title">Proyección de ventas futuras mediante regresión lineal en SQL</h3>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="objective-box">
+          <div class="objective-label">🎯 Objetivo</div>
+          <div class="objective-text">
+            Construir un modelo de regresión lineal simple directamente en T-SQL para proyectar las ventas de los próximos períodos basándose en la tendencia histórica mensual. Sin necesidad de herramientas externas, este enfoque permite obtener una estimación estadísticamente fundamentada del futuro desempeño de ventas.
+          </div>
+        </div>
+        <p class="explanation">
+          La <strong>regresión lineal</strong> calcula los coeficientes β₀ (intercepto) y β₁ (pendiente) de la recta <em>y = β₀ + β₁·x</em> usando las fórmulas de mínimos cuadrados, implementadas con funciones de agregación estándar de SQL: <code>SUM()</code>, <code>AVG()</code>, <code>COUNT()</code>. Con estos coeficientes se proyecta el monto esperado para los próximos 6 meses y se calcula el <strong>R²</strong> como medida de bondad del ajuste.
+        </p>
+        <div class="result-tags">
+          <span class="rtag">SalesOrderHeader</span>
+          <span class="rtag">Regresión Lineal</span>
+          <span class="rtag">Mínimos Cuadrados</span>
+          <span class="rtag">Forecasting</span>
+          <span class="rtag">R²</span>
+        </div>
+        <br>
+        <div class="code-wrapper">
+          <div class="code-label">
+            <span class="code-lang">T-SQL</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="cm">-- ============================================================
+-- EJEMPLO 10: Proyección de ventas con Regresión Lineal en SQL
+-- ============================================================</span>
+
+<span class="kw">WITH</span> <span class="al">VentasMes</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> <span class="fn">YEAR</span>(OrderDate), <span class="fn">MONTH</span>(OrderDate)) <span class="kw">AS</span> <span class="al">X</span>,
+        <span class="fn">FORMAT</span>(OrderDate, <span class="str">'yyyy-MM'</span>)   <span class="kw">AS</span> <span class="al">Periodo</span>,
+        <span class="fn">SUM</span>(TotalDue)                  <span class="kw">AS</span> <span class="al">Y</span>
+    <span class="kw">FROM</span> <span class="tb">Sales.SalesOrderHeader</span>
+    <span class="kw">WHERE</span> Status <span class="op">=</span> <span class="num">5</span>
+    <span class="kw">GROUP BY</span> <span class="fn">YEAR</span>(OrderDate), <span class="fn">MONTH</span>(OrderDate), <span class="fn">FORMAT</span>(OrderDate, <span class="str">'yyyy-MM'</span>)
+),
+<span class="al">Stats</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">COUNT</span>(*)                    <span class="kw">AS</span> <span class="al">N</span>,
+        <span class="fn">AVG</span>(<span class="fn">CAST</span>(X <span class="kw">AS</span> <span class="kw">FLOAT</span>))      <span class="kw">AS</span> <span class="al">X_bar</span>,
+        <span class="fn">AVG</span>(Y)                      <span class="kw">AS</span> <span class="al">Y_bar</span>,
+        <span class="fn">SUM</span>((<span class="fn">CAST</span>(X <span class="kw">AS</span> <span class="kw">FLOAT</span>) <span class="op">-</span> <span class="fn">AVG</span>(<span class="fn">CAST</span>(X <span class="kw">AS</span> <span class="kw">FLOAT</span>))) <span class="op">*</span> (Y <span class="op">-</span> <span class="fn">AVG</span>(Y)))
+            <span class="kw">AS</span> <span class="al">SXY</span>,
+        <span class="fn">SUM</span>(<span class="fn">POWER</span>(<span class="fn">CAST</span>(X <span class="kw">AS</span> <span class="kw">FLOAT</span>) <span class="op">-</span> <span class="fn">AVG</span>(<span class="fn">CAST</span>(X <span class="kw">AS</span> <span class="kw">FLOAT</span>)), <span class="num">2</span>))
+            <span class="kw">AS</span> <span class="al">SXX</span>,
+        <span class="fn">SUM</span>(<span class="fn">POWER</span>(Y <span class="op">-</span> <span class="fn">AVG</span>(Y), <span class="num">2</span>))  <span class="kw">AS</span> <span class="al">SYY</span>,
+        <span class="fn">MAX</span>(X)                      <span class="kw">AS</span> <span class="al">X_max</span>
+    <span class="kw">FROM</span> VentasMes
+),
+<span class="al">Coefs</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        N, X_bar, Y_bar, X_max,
+        SXY <span class="op">/</span> <span class="fn">NULLIF</span>(SXX, <span class="num">0</span>)                                   <span class="kw">AS</span> <span class="al">Beta1</span>,
+        Y_bar <span class="op">-</span> (SXY <span class="op">/</span> <span class="fn">NULLIF</span>(SXX, <span class="num">0</span>)) <span class="op">*</span> X_bar               <span class="kw">AS</span> <span class="al">Beta0</span>,
+        <span class="fn">POWER</span>(SXY, <span class="num">2</span>) <span class="op">/</span> <span class="fn">NULLIF</span>(SXX <span class="op">*</span> SYY, <span class="num">0</span>)                  <span class="kw">AS</span> <span class="al">R_Cuadrado</span>
+    <span class="kw">FROM</span> Stats
+),
+<span class="al">Historial</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        v.X, v.Periodo,
+        v.Y                                        <span class="kw">AS</span> <span class="al">VentaReal</span>,
+        c.Beta0 <span class="op">+</span> c.Beta1 <span class="op">*</span> v.X                  <span class="kw">AS</span> <span class="al">VentaEstimada</span>,
+        <span class="str">'Histórico'</span>                                <span class="kw">AS</span> <span class="al">Tipo</span>,
+        c.R_Cuadrado
+    <span class="kw">FROM</span> VentasMes v <span class="kw">CROSS JOIN</span> Coefs c
+    <span class="kw">UNION ALL</span>
+    <span class="cm">-- Proyección de los próximos 6 meses</span>
+    <span class="kw">SELECT</span>
+        c.X_max <span class="op">+</span> n.num                                       <span class="kw">AS</span> <span class="al">X</span>,
+        <span class="str">'Proyección M+'</span> <span class="op">+</span> <span class="fn">CAST</span>(n.num <span class="kw">AS</span> <span class="kw">VARCHAR</span>)             <span class="kw">AS</span> <span class="al">Periodo</span>,
+        <span class="kw">NULL</span>                                                   <span class="kw">AS</span> <span class="al">VentaReal</span>,
+        c.Beta0 <span class="op">+</span> c.Beta1 <span class="op">*</span> (c.X_max <span class="op">+</span> n.num)               <span class="kw">AS</span> <span class="al">VentaEstimada</span>,
+        <span class="str">'Proyección'</span>                                           <span class="kw">AS</span> <span class="al">Tipo</span>,
+        c.R_Cuadrado
+    <span class="kw">FROM</span> Coefs c
+    <span class="kw">CROSS JOIN</span> (
+        <span class="kw">VALUES</span> (<span class="num">1</span>),(<span class="num">2</span>),(<span class="num">3</span>),(<span class="num">4</span>),(<span class="num">5</span>),(<span class="num">6</span>)
+    ) n(num)
+)
+<span class="kw">SELECT</span>
+    X            <span class="kw">AS</span> <span class="al">PeriodoNum</span>,
+    Periodo,
+    Tipo,
+    <span class="fn">FORMAT</span>(VentaReal,      <span class="str">'C0'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">VentaReal</span>,
+    <span class="fn">FORMAT</span>(VentaEstimada,  <span class="str">'C0'</span>, <span class="str">'en-US'</span>) <span class="kw">AS</span> <span class="al">VentaEstimada</span>,
+    <span class="fn">FORMAT</span>(R_Cuadrado <span class="op">*</span> <span class="num">100</span>, <span class="str">'N1'</span>) <span class="op">+</span> <span class="str">'%'</span>     <span class="kw">AS</span> <span class="al">R2_Ajuste</span>
+<span class="kw">FROM</span> Historial
+<span class="kw">ORDER BY</span> X;</pre>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-title">DataMine · AW2022</div>
+  <p class="footer-sub">Blog técnico · SQL Server · AdventureWorks2022 · T-SQL Data Mining</p>
+  <p style="margin-top:1.5rem; font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--border);">
+    — Todos los scripts son compatibles con SQL Server 2016+ —
+  </p>
+</footer>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrapper').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copiar';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// Animate numbers on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.style.opacity = '1';
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.example-card').forEach(card => {
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(20px)';
+  card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  observer.observe(card);
+});
+
+const cardObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.05 });
+
+document.querySelectorAll('.example-card').forEach(card => {
+  cardObserver.observe(card);
+});
+</script>
+</body>
+</html>
